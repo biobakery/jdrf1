@@ -512,6 +512,8 @@ def subprocess_capture_stdout_stderr(command,output_folder,shell=False):
         # use line buffering to write stdout/stderr
         with open(stdout_file,"wt",buffering=1) as stdout:
             with open(stderr_file,"wt",buffering=1) as stderr:
+                if shell:
+                    command=" ".join(command)
                 subprocess.check_call(command,stderr=stderr,stdout=stdout,shell=shell)
     except (EnvironmentError, subprocess.CalledProcessError):
         logger.error("Unable to run subprocess command: " + " ".join(command))
@@ -531,7 +533,7 @@ def subprocess_capture_stdout_stderr(command,output_folder,shell=False):
 
     logger.info("Subprocess command terminated")
 
-def email_workflow_status(user,command,output_folder,workflow,user_name=None,user_email=None):
+def email_workflow_status(user,command,output_folder,workflow,user_name=None,user_email=None,shell=False):
     """ Run the subprocess and send status emails """
 
     # start the subprocess
@@ -564,7 +566,7 @@ def email_workflow_status(user,command,output_folder,workflow,user_name=None,use
         send_email_update("Starting "+subject,start_message) 
         if user_name and user_email:
             send_email_update("Starting workflow "+workflow,user_start_message,user_email)
-        subprocess_capture_stdout_stderr(command,output_folder)
+        subprocess_capture_stdout_stderr(command,output_folder,shell=shell)
         send_email_update("Completed "+subject,end_message)
         if user_name and user_email:
             send_email_update("Completed workflow "+workflow,user_end_message,user_email)
@@ -666,30 +668,32 @@ def run_workflow(user,user_name,user_email,upload_folder,process_folder,metadata
 
     # run the 16S workflow
     if study_metadata.sample_type == "16S":
-        command=["biobakery_workflows","16s","--input",
+        command=["PATH=$PICRUST_ENV:$PATH ","biobakery_workflows","16s","--input",
             upload_folder,"--output",data_products,"--input-extension",
-            extension,"--local-jobs",SixteenS_PROCESSES,"--threads",SixteenS_THREADS,"--method","usearch"]
+            extension,"--local-jobs",SixteenS_PROCESSES,"--threads",SixteenS_THREADS,"--method","usearch",
+            "--picrust-version","2"]
 
         if study_metadata.paired and study_metadata.paired_id:
             command.extend(['--pair-identifier', study_metadata.paired_id])
 
         if not error_state:
-            error_state = email_workflow_status(user,command,data_products,"16s_uparse",user_name,user_email)
+            error_state = email_workflow_status(user,command,data_products,"16s_uparse",user_name,user_email,shell=True)
 
         dada2_data_products = data_products+"_dada2"
         create_folder(dada2_data_products)
         dada2_visualizations = visualizations+"_dada2"
         create_folder(dada2_visualizations)
 
-        dada2_command=["biobakery_workflows","16s","--input",
+        dada2_command=["PATH=$PICRUST_ENV:$PATH ","biobakery_workflows","16s","--input",
             upload_folder,"--output",dada2_data_products,"--input-extension",
-            extension,"--local-jobs",SixteenS_PROCESSES,"--threads",SixteenS_THREADS,"--method","dada2"]
+            extension,"--local-jobs",SixteenS_PROCESSES,"--threads",SixteenS_THREADS,"--method","dada2",
+            "--picrust-version","2"]
 
         if study_metadata.paired and study_metadata.paired_id:
             dada2_command.extend(['--pair-identifier', study_metadata.paired_id])
 
         if not error_state:
-            email_workflow_status(user,dada2_command,dada2_data_products,"16s_dada2",user_name,user_email)
+            email_workflow_status(user,dada2_command,dada2_data_products,"16s_dada2",user_name,user_email,shell=True)
 
         # run the vis workflow
         command=["biobakery_workflows","16s_vis",
