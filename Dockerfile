@@ -13,7 +13,6 @@ RUN apt-get update -y && \
         python-dev \
 	python-setuptools \
         python-pip \
-        python3-pip \
         dialog \
         net-tools \
 	nginx \
@@ -51,7 +50,7 @@ RUN crontab /etc/cron.d/jdrf-data-release-cron
 RUN touch /var/log/cron.log
 
 # install workflows dependencies
-RUN pip install --no-cache-dir biobakery_workflows==0.13.0 humann2 kneaddata
+RUN pip install --no-cache-dir biobakery_workflows==0.13.5 humann2 kneaddata
 
 # install modules needed for validation
 RUN pip install pandas && \
@@ -157,5 +156,21 @@ RUN python /usr/local/src/bin/create_ontology_index.py -i "http://purl.obolibrar
     -o /opt/whoosh_ontology_indices/envo
 RUN python /usr/local/src/bin/create_ontology_index.py -i "http://aber-owl.net/media/ontologies/BTO/33/bto.obo" \
     -o /opt/whoosh_ontology_indices/bto
+
+# install conda
+RUN mkdir /usr/local/src/anaconda && \
+    wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O /usr/local/src/anaconda/miniconda.sh && \
+    bash /usr/local/src/anaconda/miniconda.sh -b -p /usr/local/src/anaconda/miniconda/ && \
+    cp /usr/local/src/anaconda/miniconda/etc/profile.d/conda.sh /etc/profile.d/ && \
+    . /usr/local/src/anaconda/miniconda/etc/profile.d/conda.sh
+
+# create picrust2 env
+# set up the conda channels
+RUN /usr/local/src/anaconda/miniconda/bin/conda config --add channels defaults && \
+    /usr/local/src/anaconda/miniconda/bin/conda config --add channels bioconda && \
+    /usr/local/src/anaconda/miniconda/bin/conda config --add channels conda-forge && \
+    /usr/local/src/anaconda/miniconda/bin/conda config --add channels biobakery && \
+    /usr/local/src/anaconda/miniconda/bin/conda create --name picrust_env python=3 picrust2 -c bioconda -y && \
+    conda activate picrust_env ; pip install biobakery_workflows==0.13.5 ; conda install bioconductor-dada2 r-gridextra r-seqinr -y ; conda deactivate
 
 EXPOSE :80
