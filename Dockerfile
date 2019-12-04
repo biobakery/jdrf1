@@ -79,7 +79,7 @@ RUN pip install django-auth-ldap
 # install panphlan and dependencies
 RUN wget https://bitbucket.org/CibioCM/panphlan/get/1.2.tar.gz && \
     tar xzvf 1.2.tar.gz && \
-    cp CibioCM-panphlan-b08b5a06deb1/*.py /usr/local/bin/ &&
+    cp CibioCM-panphlan-b08b5a06deb1/*.py /usr/local/bin/ && \
     rm 1.2.tar.gz && \
     rm -r CibioCM-panphlan-b08b5a06deb1
 
