@@ -8,14 +8,14 @@ RUN apt-get update -y && \
         git \
         vim \
         libpq-dev \
-	    mysql-server \
+    mysql-server \
         libmysqlclient-dev \
         python-dev \
-	    python-setuptools \
+	python-setuptools \
         python-pip \
         dialog \
         net-tools \
-	    nginx \
+	nginx \
         cron 
 
 # clone the django site and rename folder
@@ -25,10 +25,9 @@ RUN git clone https://github.com/biobakery/jdrf1.git && \
 
 # install python dependencies
 RUN pip install --upgrade pip 
-
 RUN pip install setuptools && \
     pip install supervisor && \
-    pip install django==1.11.0 gunicorn==19.7 MySQL-python==1.2.5 && \ 
+    pip install django==1.11.0 gunicorn==19.7 MySQL-python==1.2.5 && \
     pip install django-widget-tweaks && \
     pip install fasteners && \
     pip install pronto && \
@@ -75,7 +74,7 @@ RUN apt-get update -y && \
     pip install matplotlib==2.0.0
 
 # install python ldap dependencies
-RUN pip install django-auth-ldap 
+RUN pip install django-auth-ldap
 
 # install panphlan and dependencies
 RUN wget https://bitbucket.org/CibioCM/panphlan/get/1.2.tar.gz && \
@@ -118,7 +117,7 @@ RUN wget https://github.com/samtools/samtools/archive/0.1.19.tar.gz && \
 
 # Install the latest R
 RUN apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 51716619E084DAB9 && \
-    add-apt-repository 'deb https://cloud.r-project.org/bin/linux/ubuntu bionic-cran35/' && \
+    add-apt-repository 'deb https://cloud.r-project.org/bin/linux/ubuntu xenial-cran35/' && \
     gpg --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys E084DAB9 && \
     gpg -a --export E084DAB9 | apt-key add - && \
     apt-get update -y && \
