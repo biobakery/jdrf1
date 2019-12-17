@@ -8,7 +8,7 @@ RUN apt-get update -y && \
         git \
         vim \
         libpq-dev \
-     mysql-server \
+      mysql-server \
         libmysqlclient-dev \
         python-dev \
 	python-setuptools \
