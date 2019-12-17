@@ -8,7 +8,7 @@ RUN apt-get update -y && \
         git \
         vim \
         libpq-dev \
-    mysql-server \
+     mysql-server \
         libmysqlclient-dev \
         python-dev \
 	python-setuptools \
@@ -16,7 +16,7 @@ RUN apt-get update -y && \
         dialog \
         net-tools \
 	nginx \
-        cron 
+        cron
 
 # clone the django site and rename folder
 RUN git clone https://github.com/biobakery/jdrf1.git && \
