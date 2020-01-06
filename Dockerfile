@@ -8,7 +8,7 @@ RUN apt-get update -y && \
         git \
         vim \
         libpq-dev \
-	mysql-server \
+      mysql-server \
         libmysqlclient-dev \
         python-dev \
 	python-setuptools \
@@ -24,8 +24,8 @@ RUN git clone https://github.com/biobakery/jdrf1.git && \
     rmdir jdrf1
 
 # install python dependencies
-RUN pip install --upgrade pip && \
-    pip install setuptools && \
+RUN pip install --upgrade pip 
+RUN pip install setuptools && \
     pip install supervisor && \
     pip install django==1.11.0 gunicorn==19.7 MySQL-python==1.2.5 && \
     pip install django-widget-tweaks && \
@@ -64,7 +64,7 @@ RUN pip install pandas && \
 # remove texlive docs to save ~330 MB
 # install matplotlib version that is compatible with hclust and biobakery workflows (latest version is not)
 RUN apt-get update -y && \
-    apt-get install -y apt-transport-https openjdk-8-jre python-numpy python-matplotlib \
+    DEBIAN_FRONTEND="noninteractive" apt-get install -y apt-transport-https openjdk-8-jre python-numpy python-matplotlib \
         python-ldap libsasl2-dev libldap2-dev libssl-dev \
         python-scipy pandoc texlive software-properties-common \ 
         python-pandas python-biopython && \
@@ -102,7 +102,7 @@ RUN wget https://bitbucket.org/biobakery/metaphlan2/get/2.8.tar.gz && \
     pip install biom-format msgpack pysam
 
 RUN apt-get update -y && \
-    apt-get install -y install raxml muscle ncbi-blast+
+    apt-get install -y raxml muscle ncbi-blast+
 
 RUN wget https://github.com/samtools/samtools/archive/0.1.19.tar.gz && \
     tar xzvf 0.1.19.tar.gz && \
@@ -116,9 +116,8 @@ RUN wget https://github.com/samtools/samtools/archive/0.1.19.tar.gz && \
     rm -r samtools-0.1.19
 
 # Install the latest R
-RUN add-apt-repository 'deb https://cloud.r-project.org/bin/linux/ubuntu xenial-cran35/' && \
-    gpg --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys E084DAB9 && \
-    gpg -a --export E084DAB9 | apt-key add - && \
+RUN apt-key adv --keyserver keyserver.ubuntu.com --recv-keys E298A3A825C0D65DFD57CBB651716619E084DAB9 && \
+    add-apt-repository 'deb https://cloud.r-project.org/bin/linux/ubuntu xenial-cran35/' && \
     apt-get update -y && \
     apt-get install r-base-dev libcurl4-openssl-dev -y && \
     R -q -e "install.packages('vegan', repos='http://cran.r-project.org')"
