@@ -116,10 +116,8 @@ RUN wget https://github.com/samtools/samtools/archive/0.1.19.tar.gz && \
     rm -r samtools-0.1.19
 
 # Install the latest R
-RUN apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 51716619E084DAB9 && \
+RUN apt-key adv --keyserver keyserver.ubuntu.com --recv-keys E298A3A825C0D65DFD57CBB651716619E084DAB9 && \
     add-apt-repository 'deb https://cloud.r-project.org/bin/linux/ubuntu xenial-cran35/' && \
-    gpg --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys E084DAB9 && \
-    gpg -a --export E084DAB9 | apt-key add - && \
     apt-get update -y && \
     apt-get install r-base-dev libcurl4-openssl-dev -y && \
     R -q -e "install.packages('vegan', repos='http://cran.r-project.org')"
