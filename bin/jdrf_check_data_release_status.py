@@ -1,4 +1,4 @@
-
+#
 """
 Checks all datasets in the specified JDRF data folder to verify whether or 
 not the dataset should be moved to interal release or flagged for public release.
@@ -24,7 +24,8 @@ import django
 import pendulum
 
 # Setup up django outside of the environment 
-sys.path.append(os.path.join(os.path.abspath(os.path.join(os.getcwd(), os.pardir)), 'jdrf'))
+JDRF_INSTALL_PATH=os.path.join(os.path.abspath(os.path.join(os.path.realpath(__file__), os.pardir, os.pardir)), 'jdrf')
+sys.path.append(JDRF_INSTALL_PATH)
 os.environ['DJANGO_SETTINGS_MODULE'] = 'jdrf.settings'
 django.setup()
 
@@ -53,15 +54,16 @@ def get_all_archived_data_sets(archive_folder):
     data_dirs = list(filter(lambda d: os.path.isdir(d), glob.glob("%s/*/*" % archive_folder)))
     data_dirs = list(filter(lambda d: "public" not in d, data_dirs))
     data_dirs = list(filter(lambda d: "demo" not in d, data_dirs))
+    data_dirs = list(filter(lambda d: "test" not in d, data_dirs))
     data_dirs = sorted(data_dirs, key=study_sort)
 
     for (study_name, study_dirs) in groupby(data_dirs, study_sort):
         archived_dirs = list(study_dirs)
 
-        # Grab the users emai
+        # Grab the users email
         user = archived_dirs[0].split(os.sep)[3]
 
-        if user == "root":
+        if user in ["root", "carze", "ljmciver", "kbonham", "smaharjan"]:
             continue
 
         user_info = get_contact_info(archived_dirs[0])
@@ -91,9 +93,9 @@ def check_datasets_release_status(datasets, public_release, internal_release):
 
     for (username, datasets) in datasets.iteritems():
         for dataset in datasets:
-            study = dataset.get('study')
+            study = dataset.get('study').encode('ascii', errors='ignore')
             user_email = dataset.get('user_email')
-            user_name = dataset.get('name')
+            user_name = dataset.get('name').encode('ascii', errors='ignore')
             dataset_dirs = dataset.get('dirs')
             archive_dt = dataset.get('archive_date')
 
@@ -104,7 +106,6 @@ def check_datasets_release_status(datasets, public_release, internal_release):
 
             days_to_public = (public_release_dt - current_dt).days
             days_to_internal = (internal_release_dt - current_dt).days
-
             datasets_status[user_email].append([user_name, study, dataset_dirs,
                                                 {'public': max(0, days_to_public),
                                                  'internal': max(0, days_to_internal)}])
@@ -118,27 +119,27 @@ def send_dataset_notifications(dataset_status):
     and for remaining datasets will send a status update if the current day matches
     the specified day to send email report out.
     """
-    release_msg = ("Hello %s!\n\nThis is an automated message "
-                   "to inform you that the following datasets are "
-                   "set to be released in the following days.\n\n"
-                   "Internal:\n%s\n\n"
-                   "Public:\n%s"
-                   "\n\n** Datasets pending internal and external release will not be released without user approval **"
-                   "\n\nPlease feel free to email the JDRF MIBC staff "
-                   "if you have any questions regarding the data release "
-                   "policy.\n\nThank You!\nThe JDRF MIBC team")
+    release_msg = "".join([
+                   "Hello {0}!\n\nThis is an automated message ",
+                   "to inform you that the following datasets are ",
+                   "set to be released in the following days.\n\n",
+                   "Internal:\n{1}\n\n",
+                   "Public:\n{2}",
+                   "\n\n** Datasets pending internal and external release (ie 0 days to release) will not be released without PI approval **",
+                   "\n\nPlease feel free to email the JDRF MIBC staff ",
+                   "if you have any questions regarding the data release ",
+                   "policy.\n\nThank You!\nThe JDRF MIBC team"])
 
     for (email, datasets) in dataset_status.iteritems():
-        internal_release_dates = "   - " + "\n   - ".join(["%s: %s days to release" % (d[1], d[3].get('internal')) for d in datasets])
-        public_release_dates = "   - " + "\n   - ".join(["%s: %s days to release" % (d[1], d[3].get('public')) for d in datasets])
+        internal_release_dates = "   - " + "\n   - ".join(["{0}: {1} days to release".format(d[1], d[3].get('internal')) for d in datasets])
+        public_release_dates = "   - " + "\n   - ".join(["{0}: {1} days to release".format(d[1], d[3].get('public')) for d in datasets])
 
         user_name = datasets[0][0]
-        release_msg = release_msg % (datasets[0][0], internal_release_dates, public_release_dates)
-        send_email_update("Data Release Update %s - %s" % (pendulum.now().to_formatted_date_string(), user_name),  release_msg, to=email)
+        custom_release_msg = release_msg.format(user_name, internal_release_dates, public_release_dates)
+        #send_email_update("Data Release Update %s - %s" % (pendulum.now().to_formatted_date_string(), user_name), custom_release_msg, to=email)
 
 
 archived_datasets = get_all_archived_data_sets(settings.ARCHIVE_FOLDER)
-
 # With all our datasets we want to bucket them into three bins by user: 
 #
 #       1.) Datasets that haven't hit internal or public release time limit
@@ -146,5 +147,4 @@ archived_datasets = get_all_archived_data_sets(settings.ARCHIVE_FOLDER)
 #       3.) Datasets that have hit public release time limit
 dataset_status = check_datasets_release_status(archived_datasets, settings.RELEASE_PUBLIC_MONTHS, 
                                                settings.RELEASE_INTERNAL_MONTHS)
-
 send_dataset_notifications(dataset_status)
