@@ -53,8 +53,8 @@ def get_all_archived_data_sets(archive_folder):
 
     data_dirs = list(filter(lambda d: os.path.isdir(d), glob.glob("%s/*/*" % archive_folder)))
     data_dirs = list(filter(lambda d: "public" not in d, data_dirs))
-    data_dirs = list(filter(lambda d: "demo" not in d, data_dirs))
-    data_dirs = list(filter(lambda d: "test" not in d, data_dirs))
+    data_dirs = list(filter(lambda d: "demo" not in d.lower(), data_dirs))
+    data_dirs = list(filter(lambda d: "test" not in d.lower(), data_dirs))
     data_dirs = sorted(data_dirs, key=study_sort)
 
     for (study_name, study_dirs) in groupby(data_dirs, study_sort):
