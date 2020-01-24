@@ -120,15 +120,36 @@ def send_dataset_notifications(dataset_status):
     the specified day to send email report out.
     """
     release_msg = "".join([
-                   "Hello {0}!\n\nThis is an automated message ",
-                   "to inform you that the following datasets are ",
-                   "set to be released in the following days.\n\n",
+                   "Hello {0},",
+                   "\n\n",
+                   "Thank you for depositing data with the MIBC! ",
+                   "We are reaching out because some of the data you have deposited ",
+                   "is ready for (internal/external) release. Please see below for ",
+                   "more information and MIBC's data release policies.",
+                   "\n\n",
+                   "The JDRF has a data release policy based on the date each dataset ",
+                   "is generated and deposited. Six months after deposition, data is ",
+                   "set to be released internally (available ONLY to the JDRF MIBC ",
+                   "consortium members) and a year later (18 months after deposition) ",
+                   "the data is set to be released externally (publicly downloadable from ",
+                   "the JDRF MIBC site and released to the SRA/GEO/etc. as appropriate).",
+                   "\n\n",
+                   "** The JDRF MIBC will only release data once the release date is ",
+                   "approved by the primary investigator. **",
+                   "\n\n",
+                   "If one of your data sets below has 0 days to release (or is close), ",
+                   "please reach out to us (reply ALL to this email) to let us know if ",
+                   "you are or when you will be ready for the data to be released.",
+                   "\n\n",
                    "Internal:\n{1}\n\n",
                    "Public:\n{2}",
-                   "\n\n** Datasets pending internal and external release (ie 0 days to release) will not be released without PI approval **",
-                   "\n\nPlease feel free to email the JDRF MIBC staff ",
-                   "if you have any questions regarding the data release ",
-                   "policy.\n\nThank You!\nThe JDRF MIBC team"])
+                   "\n\n",
+                   "Please email the JDRF MIBC team (cced on this email) if you have any ",
+                   "questions regarding the data release policy.",
+                   "\n\n",
+                   "Thank You,",
+                   "\n",
+                   "The JDRF MIBC team"])
 
     for (email, datasets) in dataset_status.iteritems():
         internal_release_dates = "   - " + "\n   - ".join(["{0}: {1} days to release".format(d[1], d[3].get('internal')) for d in datasets])
