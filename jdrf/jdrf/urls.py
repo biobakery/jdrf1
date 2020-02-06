@@ -38,6 +38,7 @@ urlpatterns = [
     url(r'^term/(?P<ontology_name>.*)/(?P<term_query>.*)/', views.search_ontology, name="search_ontology"),
     url(r'^process/', views.process_files,name="process"),
     url(r'^download/$', views.download_files,name="download"),
+    url(r'^release/$', views.release_files,name="release"),
     url(r'^about/', TemplateView.as_view(template_name='about.html'),name="about"),
     url(r'^download-file/(?P<file_name>.*)/$', views.download_file, name="download_file")
 ]

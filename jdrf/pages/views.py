@@ -388,7 +388,7 @@ def list_file_in_folder(folder,exclude_files=[".anadama"]):
 
     # get all of the files in the user process folder, with directories
     list_files = []
-    for path, directories, files in os.walk(folder):
+    for path, directories, files in os.walk(folder, followlinks=True):
         # remove the base process folder form the path
         reduced_path = path.replace(folder,"")
         # remove path sep if first character
@@ -516,6 +516,17 @@ def delete_files(request):
         data['error_msg'] = "Files cannot be deleted when a workflow is running."
 
     return JsonResponse(data)
+
+@login_required(login_url='/login/')
+def release_files(request):
+    """ List all of the processed files available for the user to download from the internal releases"""
+
+    # get all of the upload and archive files/folders
+    release_folder = settings.RELEASE_FOLDER
+    response={}
+    response["release_files"] = list_file_in_folder(release_folder,exclude_files=[".anadama","workflow.stderr","workflow.stdout"])
+
+    return render(request,'release.html',response)
 
 @login_required(login_url='/login/')
 def download_files(request):

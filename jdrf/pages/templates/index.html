@@ -25,9 +25,10 @@
                 <ul class="nav masthead-nav">
                   {% if not user.is_authenticated %} <li><a href="/login">Login</a></li> {% endif %}
                   {% if user.is_authenticated %} <li><a href="/metadata">Upload Metadata</a></li> {% endif %}
-                  {% if user.is_authenticated %} <li><a href="/upload">Upload Raw Data</a></li> {% endif %}
+                  {% if user.is_authenticated %} <li><a href="/upload">Upload Data</a></li> {% endif %}
                   {% if user.is_authenticated %} <li><a href="/process">Process</a></li> {% endif %}
-                  {% if user.is_authenticated %} <li><a href="/download">Download</a></li> {% endif %}
+                  {% if user.is_authenticated %} <li><a href="/download">Files</a></li> {% endif %}
+                  {% if user.is_authenticated %} <li><a href="/release">Release</a></li> {% endif %}
                   <li><a href="about">About</a></li>
                   {% if user.is_authenticated %} <li><a href="/logout">Logout</a></li> {% endif %}
                 </ul>

@@ -17,6 +17,7 @@ import logging
 UPLOAD_FOLDER = "/opt/upload_folder/"
 PROCESS_FOLDER = "/opt/process_folder/"
 ARCHIVE_FOLDER = "/opt/archive_folder/"
+RELEASE_FOLDER = "/opt/release_folder/"
 TEMP_FOLDER = "/opt/temp/"
 SSH_KEY = "/opt/SSH/jdrf_transfer_key"
 REMOTE_TRANSFER_SERVER = "jdrf2.rc.fas.harvard.edu"
