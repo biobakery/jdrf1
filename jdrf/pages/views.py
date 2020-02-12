@@ -518,17 +518,6 @@ def delete_files(request):
     return JsonResponse(data)
 
 @login_required(login_url='/login/')
-def release_files(request):
-    """ List all of the processed files available for the user to download from the internal releases"""
-
-    # get all of the upload and archive files/folders
-    release_folder = settings.RELEASE_FOLDER
-    response={}
-    response["release_files"] = list_file_in_folder(release_folder,exclude_files=[".anadama","workflow.stderr","workflow.stdout"])
-
-    return render(request,'release.html',response)
-
-@login_required(login_url='/login/')
 def download_files(request):
     """ List all of the processed files available for the user to download """
 
