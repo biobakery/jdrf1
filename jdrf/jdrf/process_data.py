@@ -423,11 +423,16 @@ def check_metadata_files_complete(user,folder,metadata_file,study_file):
     if study_metadata.sample_type == "other":
         all_raw_files = [os.path.join(folder, raw_file) for raw_file in all_raw_files]
 
-        metadata_samples = get_metadata_samples(metadata_file)
-        missing_samples=verify_samples_in_analysis_files(all_raw_files, metadata_samples)
+        # filter out files of unexpected type
+        if all(map(lambda x: x.endswith(".tsv"), all_raw_files)) or all(map(lambda x: x.endswith(".raw"), all_raw_files)):
+            metadata_samples = get_metadata_samples(metadata_file)
+            missing_samples=verify_samples_in_analysis_files(all_raw_files, metadata_samples)
 
-        if missing_samples:
-            message="ERROR: The following samples are missing from uploaded files: " + ",".join(missing_samples)
+            if missing_samples:
+                message="ERROR: The following samples are missing from uploaded files: " + ",".join(missing_samples)
+                error_code = 1
+        else:
+            message="ERROR: Only provide data files with extensions '.tsv', for tab-delimited data, or '.raw', for other types, for the 'other' study type."
             error_code = 1
     else:
         missing_from_metadata=all_raw_files.difference(metadata_files)
