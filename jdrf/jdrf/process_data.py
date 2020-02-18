@@ -159,7 +159,6 @@ def validate_study_metadata(metadata_dict, logger):
     """
     metadata_df = pd.DataFrame(metadata_dict)
     schema = schemas['study']
-
     (is_valid, error_context) = _validate_metadata(metadata_df, schema, logger)
     return (is_valid, metadata_df, error_context)
 
@@ -469,7 +468,7 @@ def create_folder(folder):
             logger.info("Unable to create folder: " + folder)
             raise
 
-def send_email_update(subject,message,to=None):
+def send_email_update(subject,message,to=None,cc=None):
     """ Send an email to update the status of workflows """
     # get the logger instance
     logger=logging.getLogger('jdrf1')
@@ -479,7 +478,10 @@ def send_email_update(subject,message,to=None):
     msg['From'] = EMAIL_FROM
     if to:
         msg['To'] = to
-        msg['Cc'] = EMAIL_TO
+        if cc:
+            msg['Cc'] = EMAIL_to+','+cc
+        else:
+            msg['Cc'] = EMAIL_to
         msg['Subject'] = "JDRF1 MIBC USER: " + subject
         mail_to = [to, EMAIL_TO]
     else:
