@@ -39,14 +39,18 @@ def get_contact_info(archive_dir):
     """ Retrieve user email and user first name given an archive directory.
     """
     user_manifest_file = os.path.join(os.path.dirname(archive_dir), 'MANIFEST')
-    user_metadata_file = os.path.join(os.path.dirname(archive_dir), 'metadata_study.tsv')
     with open(user_manifest_file) as manifest:
        user_info = safe_load(manifest)
-    with open(user_metadata_file) as user_metadata:
-        csv_reader = list(csv.reader(user_metadata, delimiter=','))
-        user_info.update(PI_email = csv_reader[1][10])
     return user_info
 
+def get_PI_email(metadata_study_path):
+    """ Retrieve PI email from archive directory metadatastudy.tsv file.
+    """
+    with open(metadata_study_path) as user_metadata:
+        csv_reader = csv.DictReader(user_metadata, delimiter=',')
+        for rows in csv_reader:
+            PI_email = rows['pi_email']
+        return PI_email
 
 def get_all_archived_data_sets(archive_folder):
     """ Retrieve all archived folders and return a list of dictionaries 
@@ -78,6 +82,9 @@ def get_all_archived_data_sets(archive_folder):
         current_dt = pendulum.now()
         archive_dt = pendulum.from_format(archive_date, 'MM_D_YYYY')
 
+        metadata_study_file_path = os.path.join(archive_folder,user,study_name+'_'+archive_date,'metadata',settings.METADATA_GROUP_FILE_NAME)
+        PI_email = get_PI_email(metadata_study_file_path)
+        user_info.update(PI_email = PI_email)
         archived_datasets[user].append({'study': study_name, 
                                         'dirs': archived_dirs, 
                                         'user_email': user_info.get('email'), 
