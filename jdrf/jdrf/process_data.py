@@ -479,11 +479,13 @@ def send_email_update(subject,message,to=None,cc=None):
     if to:
         msg['To'] = to
         if cc:
-            msg['Cc'] = EMAIL_to+','+cc
+            msg['To'] = to+','+EMAIL_TO+','+cc
+            mail_to = [to, EMAIL_TO, cc]
         else:
-            msg['Cc'] = EMAIL_to
+            msg['To'] = to+','+EMAIL_TO
+            mail_to = [to, EMAIL_TO]
         msg['Subject'] = "JDRF1 MIBC USER: " + subject
-        mail_to = [to, EMAIL_TO]
+       
     else:
         msg['To'] = EMAIL_TO
         msg['Subject'] = "JDRF1 MIBC DEVELOPER: " + subject

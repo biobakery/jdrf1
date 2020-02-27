@@ -82,7 +82,7 @@ def get_all_archived_data_sets(archive_folder):
         current_dt = pendulum.now()
         archive_dt = pendulum.from_format(archive_date, 'MM_D_YYYY')
 
-        metadata_study_file_path = os.path.join(archive_folder,user,study_name+'_'+archive_date,'metadata',settings.METADATA_GROUP_FILE_NAME)
+        metadata_study_file_path = os.path.join(archive_folder,user,study_name+'_'+archive_date+'_uploaded','metadata',settings.METADATA_GROUP_FILE_NAME)
         PI_email = get_PI_email(metadata_study_file_path)
         user_info.update(PI_email = PI_email)
         archived_datasets[user].append({'study': study_name, 
