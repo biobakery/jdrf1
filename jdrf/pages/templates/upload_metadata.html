@@ -125,12 +125,26 @@
               placeholder="" required>
             <span class="glyphicon form-control-feedback" aria-hidden="true"></span>
           </div>
-          <div class="form-group has-feedback">
-            <label for="pi_name" class="control-label">PI Name</label>
-            <input type="text" pattern="^[A-Za-z]+" class="form-control" id="pi_name" , name="pi_name" , placeholder=""
-              data-error="Please provide a valid PI name." required>
-            <span class="glyphicon form-control-feedback" aria-hidden="true"></span>
-            <div class="help-block with-errors"></div>
+          <div class="row">
+            <div class="col-md-6 form-group has-feedback">
+              <label for="pi_name" class="control-label">PI Name</label>
+              <div class="right-inner-addon">
+              <input type="text" pattern="^[a-zA-Z]+(([',. -][a-zA-Z ])?[a-zA-Z]*)*$" class="form-control" id="pi_name" , name="pi_name" , placeholder=""
+                data-error="Please provide a valid PI name." required>
+              <span class="glyphicon form-control-feedback" aria-hidden="true"></span>
+              <div class="help-block with-errors"></div>
+              </div>
+            </div>
+
+            <div class="col-md-6 form-group has-feedback">
+              <label for="pi_email" class="control-label">PI Email</label>
+              <div class="right-inner-addon">
+              <input type="email" class="form-control" id="pi_email" , name="pi_email" , placeholder="example@gmail.com"
+                data-error="Please provide a valid PI email." required>
+              <span class="glyphicon form-control-feedback" aria-hidden="true"></span>
+              <div class="help-block with-errors"></div>
+            </div>
+            </div>
           </div>
           <div class="row">
             <div class="col-md-6 form-group has-feedback">

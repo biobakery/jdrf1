@@ -5,7 +5,7 @@ import subprocess
 
 import pandas
 
-IGNORE_NAMES = ["huttenhower","arze","ljmciver","demo","test"]
+IGNORE_NAMES = ["huttenhower","arze","ljmciver","demo","test","smaharjan"]
 
 METADATA_FOLDER = "metadata"
 METADATA_FILE_NAME = "metadata.tsv"

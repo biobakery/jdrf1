@@ -24,6 +24,9 @@ study_schema = Schema([
     Column('animal_vendor', [LeadingWhitespaceValidation()]),
     Column('paired', [InListValidation(['true', 'false'])]),
     Column('paired_id', [InListValidation(['']) | MatchesPatternValidation(r'[a-zA-Z0-9_.]+')])
+    ,
+    Column('pi_email', [CustomSeriesValidation(lambda x: ~x.isnull(), 'A value is required for the pi_email column.') &
+                        ~InListValidation([''])])
 ])
 
 sample_schema = Schema([

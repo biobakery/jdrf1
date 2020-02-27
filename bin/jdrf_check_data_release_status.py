@@ -1,7 +1,7 @@
 #
 """
 Checks all datasets in the specified JDRF data folder to verify whether or 
-not the dataset should be moved to interal release or flagged for public release.
+not the dataset should be moved to internal release or flagged for public release.
 
 In the case of a dataset not yet hitting either release status (or if ready for release)
 the owner of the dataset will be notified how many days until internal release, public release 
@@ -22,6 +22,7 @@ from yaml import safe_load
 
 import django
 import pendulum
+import csv
 
 # Setup up django outside of the environment 
 JDRF_INSTALL_PATH=os.path.join(os.path.abspath(os.path.join(os.path.realpath(__file__), os.pardir, os.pardir)), 'jdrf')
@@ -40,9 +41,16 @@ def get_contact_info(archive_dir):
     user_manifest_file = os.path.join(os.path.dirname(archive_dir), 'MANIFEST')
     with open(user_manifest_file) as manifest:
        user_info = safe_load(manifest)
-
     return user_info
 
+def get_PI_email(metadata_study_path):
+    """ Retrieve PI email from archive directory metadatastudy.tsv file.
+    """
+    with open(metadata_study_path) as user_metadata:
+        csv_reader = csv.DictReader(user_metadata, delimiter=',')
+        for rows in csv_reader:
+            PI_email = rows['pi_email']
+        return PI_email
 
 def get_all_archived_data_sets(archive_folder):
     """ Retrieve all archived folders and return a list of dictionaries 
@@ -74,9 +82,13 @@ def get_all_archived_data_sets(archive_folder):
         current_dt = pendulum.now()
         archive_dt = pendulum.from_format(archive_date, 'MM_D_YYYY')
 
+        metadata_study_file_path = os.path.join(archive_folder,user,study_name+'_'+archive_date+'_uploaded','metadata',settings.METADATA_GROUP_FILE_NAME)
+        PI_email = get_PI_email(metadata_study_file_path)
+        user_info.update(PI_email = PI_email)
         archived_datasets[user].append({'study': study_name, 
                                         'dirs': archived_dirs, 
                                         'user_email': user_info.get('email'), 
+                                        'PI_email': user_info.get('PI_email'),
                                         'name': user_info.get('name'),
                                         'archive_date': archive_dt})
 
@@ -95,18 +107,19 @@ def check_datasets_release_status(datasets, public_release, internal_release):
         for dataset in datasets:
             study = dataset.get('study').encode('ascii', errors='ignore')
             user_email = dataset.get('user_email')
+            PI_email = dataset.get('PI_email')
             user_name = dataset.get('name').encode('ascii', errors='ignore')
             dataset_dirs = dataset.get('dirs')
             archive_dt = dataset.get('archive_date')
 
-            datasets_status.setdefault(user_email, [])
+            datasets_status.setdefault(PI_email, [])
 
             public_release_dt = archive_dt.add(months=public_release)
             internal_release_dt = archive_dt.add(months=internal_release)
 
             days_to_public = (public_release_dt - current_dt).days
             days_to_internal = (internal_release_dt - current_dt).days
-            datasets_status[user_email].append([user_name, study, dataset_dirs,
+            datasets_status[PI_email].append([user_name, user_email, study, dataset_dirs,
                                                 {'public': max(0, days_to_public),
                                                  'internal': max(0, days_to_internal)}])
 
@@ -156,8 +169,9 @@ def send_dataset_notifications(dataset_status):
         public_release_dates = "   - " + "\n   - ".join(["{0}: {1} days to release".format(d[1], d[3].get('public')) for d in datasets])
 
         user_name = datasets[0][0]
+        user_email = datasets[0][1]
         custom_release_msg = release_msg.format(user_name, internal_release_dates, public_release_dates)
-        #send_email_update("Data Release Update %s - %s" % (pendulum.now().to_formatted_date_string(), user_name), custom_release_msg, to=email)
+        # send_email_update("Data Release Update %s - %s" % (pendulum.now().to_formatted_date_string(), user_name), custom_release_msg, to=email, cc=user_email)
 
 
 archived_datasets = get_all_archived_data_sets(settings.ARCHIVE_FOLDER)
@@ -166,6 +180,6 @@ archived_datasets = get_all_archived_data_sets(settings.ARCHIVE_FOLDER)
 #       1.) Datasets that haven't hit internal or public release time limit
 #       2.) Datasets that hit internal but not public release time limit
 #       3.) Datasets that have hit public release time limit
-dataset_status = check_datasets_release_status(archived_datasets, settings.RELEASE_PUBLIC_MONTHS, 
-                                               settings.RELEASE_INTERNAL_MONTHS)
+dataset_status = check_datasets_release_status(archived_datasets, settings.RELEASE_PUBLIC_MONTHS,
+                                    settings.RELEASE_INTERNAL_MONTHS)
 send_dataset_notifications(dataset_status)
