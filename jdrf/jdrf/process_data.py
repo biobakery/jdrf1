@@ -673,6 +673,7 @@ def run_workflow(user,user_name,user_email,upload_folder,process_folder,metadata
             extension,"--local-jobs",SixteenS_PROCESSES,"--threads",SixteenS_THREADS,"--method","usearch",
             "--picrust-version","2"]
 
+        # Paired_id flag passed to the biobakery workflow of 16s 
         if study_metadata.paired and study_metadata.paired_id:
             command.extend(['--pair-identifier', study_metadata.paired_id])
 
@@ -689,6 +690,7 @@ def run_workflow(user,user_name,user_email,upload_folder,process_folder,metadata
             extension,"--local-jobs",SixteenS_PROCESSES,"--threads",SixteenS_THREADS,"--method","dada2",
             "--picrust-version","2"]
 
+        # Additional paired_id flag passed to the dada2 workflow of 16s 
         if study_metadata.paired and study_metadata.paired_id:
             dada2_command.extend(['--pair-identifier', study_metadata.paired_id])
 
@@ -714,6 +716,7 @@ def run_workflow(user,user_name,user_email,upload_folder,process_folder,metadata
             "--local-jobs",WMGX_PROCESSES,"--threads",WMGX_THREADS,"--run-strain-gene-profiling",
             "--max-strains",MAX_STRAINS]
 
+        # Additional paired_id flag passed to the biobakery workflow of metagenomics and metatranscriptomics  
         if study_metadata.paired and study_metadata.paired_id:
             command.extend(['--pair-identifier', study_metadata.paired_id])
 
