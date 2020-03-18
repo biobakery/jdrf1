@@ -83,6 +83,11 @@ def get_all_archived_data_sets(archive_folder):
         archive_dt = pendulum.from_format(archive_date, 'MM_D_YYYY')
 
         metadata_study_file_path = os.path.join(archive_folder,user,study_name+'_'+archive_date+'_uploaded','metadata',settings.METADATA_GROUP_FILE_NAME)
+        internal_release_complete = False
+        # checking for the dot file to determine if a data set has been internally released
+        if os.path.isfile(os.path.join(os.path.dirname(metadata_study_file_path), settings.INTERNAL_RELEASE_DOT_FILE)):
+            internal_release_complete = True
+
         PI_email = get_PI_email(metadata_study_file_path)
         user_info.update(PI_email = PI_email)
         archived_datasets[user].append({'study': study_name, 
@@ -90,7 +95,8 @@ def get_all_archived_data_sets(archive_folder):
                                         'user_email': user_info.get('email'), 
                                         'PI_email': user_info.get('PI_email'),
                                         'name': user_info.get('name'),
-                                        'archive_date': archive_dt})
+                                        'archive_date': archive_dt,
+                                        'internal_release_complete': internal_release_complete})
 
     return archived_datasets
 
@@ -111,17 +117,19 @@ def check_datasets_release_status(datasets, public_release, internal_release):
             user_name = dataset.get('name').encode('ascii', errors='ignore')
             dataset_dirs = dataset.get('dirs')
             archive_dt = dataset.get('archive_date')
-
-            datasets_status.setdefault(PI_email, [])
+            internal_release_complete = dataset.get('internal_release_complete')
 
             public_release_dt = archive_dt.add(months=public_release)
             internal_release_dt = archive_dt.add(months=internal_release)
-
             days_to_public = (public_release_dt - current_dt).days
             days_to_internal = (internal_release_dt - current_dt).days
+
+            datasets_status.setdefault(PI_email, [])      
+                                        
+
             datasets_status[PI_email].append([user_name, user_email, study, dataset_dirs,
                                                 {'public': max(0, days_to_public),
-                                                 'internal': max(0, days_to_internal)}])
+                                                 'internal': max(0, days_to_internal)}, internal_release_complete])
 
     return datasets_status
 
@@ -154,8 +162,8 @@ def send_dataset_notifications(dataset_status):
                    "please reach out to us (reply ALL to this email) to let us know if ",
                    "you are or when you will be ready for the data to be released.",
                    "\n\n",
-                   "Internal:\n{1}\n\n",
-                   "Public:\n{2}",
+                   "{1}",
+                   "{2}",
                    "\n\n",
                    "Please email the JDRF MIBC team (cced on this email) if you have any ",
                    "questions regarding the data release policy.",
@@ -165,8 +173,13 @@ def send_dataset_notifications(dataset_status):
                    "The JDRF MIBC team"])
 
     for (email, datasets) in dataset_status.iteritems():
-        internal_release_dates = "   - " + "\n   - ".join(["{0}: {1} days to release".format(d[1], d[3].get('internal')) for d in datasets])
-        public_release_dates = "   - " + "\n   - ".join(["{0}: {1} days to release".format(d[1], d[3].get('public')) for d in datasets])
+        if datasets[0][5]:
+            internal_release_dates = "Internal:\n{0}\n\n".format("   - " + "\n   - ".join(["{0}: {1} days to release".format(d[2], d[4].get('internal')) for d in datasets]))
+        else:
+            internal_release_dates = ""
+
+        public_release_dates = "Public:\n{0}".format("   - " + "\n   - ".join(["{0}: {1} days to release".format(d[2], d[4].get('public')) for d in datasets]))
+        
 
         user_name = datasets[0][0]
         user_email = datasets[0][1]

@@ -153,7 +153,6 @@ jQuery(document).ready(function() {
     var is_other_data_type = false;
     $('#sample_type').on('change', function() {
         var value = $(this).val();
-
         $("#paired_id").val("");
         $("#paired").val("no");
         $('#paired-id-div').addClass('hidden');
@@ -175,12 +174,13 @@ jQuery(document).ready(function() {
                 $("#paired_id").val(".R1");
             }
         }
-    })
+    });
 
     $('#paired').on('change', function() {
         var value = $(this).val();
 
-        if (value == "yes") {
+
+        if (value === "true") {
             $('#paired-id-div').removeClass('hidden');
             $('#paired_id').prop('required', true);
         } else {
@@ -188,7 +188,7 @@ jQuery(document).ready(function() {
             $('#paired_id').prop('required', false);
             $('#paired_id').val("");
         }
-    })
+    });
 
     // On page load we want to see if a cookie exists to indicate study metadata has been created for this file.
     if (Cookies.get('study_metadata') == '1') {
@@ -257,9 +257,9 @@ jQuery(document).ready(function() {
             'pair-identifier': function(el) {
                 var pair_identifier = $(el).val();
                 var pair_ident_re = /[-a-zA-Z0-9_.]+/;
-                if ($('#paired').val() == "yes" && pair_ident_re.test(pair_identifier) == false) {
+                if ($('#paired').val() == "true" && pair_ident_re.test(pair_identifier) == false) {
                     return "Must provide valid pair-identifier (e.g. R1, 1, etc.)";
-                } 
+                }
             }
         }
     });
