@@ -90,6 +90,7 @@ def get_all_archived_data_sets(archive_folder):
             internal_release_complete = True
 
         PI_email, PI_name = get_PI_email(metadata_study_file_path)
+
         user_info.update(PI_email = PI_email)
         user_info.update(PI_name = PI_name)
         archived_datasets[user].append({'study': study_name, 
@@ -100,6 +101,7 @@ def get_all_archived_data_sets(archive_folder):
                                         'archive_date': archive_dt,
                                         'internal_release_complete': internal_release_complete, 
                                         'PI_name': user_info.get('PI_name')})
+
 
     return archived_datasets
 
@@ -188,7 +190,7 @@ def send_dataset_notifications(dataset_status):
         user_name = datasets[0][6]
         user_email = datasets[0][1]
         custom_release_msg = release_msg.format(user_name, internal_release_dates, public_release_dates)
-        # send_email_update("Data Release Update %s - %s" % (pendulum.now().to_formatted_date_string(), user_name), custom_release_msg, to=email, cc=user_email)
+        send_email_update("Data Release Update %s - %s" % (pendulum.now().to_formatted_date_string(), user_name), custom_release_msg, to=email, cc=user_email)
 
 
 archived_datasets = get_all_archived_data_sets(settings.ARCHIVE_FOLDER)
