@@ -73,7 +73,7 @@ SECRET_KEY = get_env('JDRF_SECRET_KEY')
 DEBUG = True
 
 # ADD the host for this app here
-ALLOWED_HOSTS = ['0.0.0.0', 'localhost']
+ALLOWED_HOSTS = ['0.0.0.0', 'localhost','jdrf1.rc.fas.harvard.edu']
 
 # Set login redirect page
 LOGIN_REDIRECT_URL = "upload_metadata"

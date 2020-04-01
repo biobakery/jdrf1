@@ -50,7 +50,8 @@ def get_PI_email(metadata_study_path):
         csv_reader = csv.DictReader(user_metadata, delimiter=',')
         for rows in csv_reader:
             PI_email = rows['pi_email']
-        return PI_email
+            PI_name = rows['pi_name']
+        return PI_email,PI_name
 
 def get_all_archived_data_sets(archive_folder):
     """ Retrieve all archived folders and return a list of dictionaries 
@@ -88,15 +89,17 @@ def get_all_archived_data_sets(archive_folder):
         if os.path.isfile(os.path.join(os.path.dirname(metadata_study_file_path), settings.INTERNAL_RELEASE_DOT_FILE)):
             internal_release_complete = True
 
-        PI_email = get_PI_email(metadata_study_file_path)
+        PI_email, PI_name = get_PI_email(metadata_study_file_path)
         user_info.update(PI_email = PI_email)
+        user_info.update(PI_name = PI_name)
         archived_datasets[user].append({'study': study_name, 
                                         'dirs': archived_dirs, 
                                         'user_email': user_info.get('email'), 
                                         'PI_email': user_info.get('PI_email'),
                                         'name': user_info.get('name'),
                                         'archive_date': archive_dt,
-                                        'internal_release_complete': internal_release_complete})
+                                        'internal_release_complete': internal_release_complete, 
+                                        'PI_name': user_info.get('PI_name')})
 
     return archived_datasets
 
@@ -114,6 +117,7 @@ def check_datasets_release_status(datasets, public_release, internal_release):
             study = dataset.get('study').encode('ascii', errors='ignore')
             user_email = dataset.get('user_email')
             PI_email = dataset.get('PI_email')
+            PI_name = dataset.get('PI_name')
             user_name = dataset.get('name').encode('ascii', errors='ignore')
             dataset_dirs = dataset.get('dirs')
             archive_dt = dataset.get('archive_date')
@@ -129,7 +133,7 @@ def check_datasets_release_status(datasets, public_release, internal_release):
 
             datasets_status[PI_email].append([user_name, user_email, study, dataset_dirs,
                                                 {'public': max(0, days_to_public),
-                                                 'internal': max(0, days_to_internal)}, internal_release_complete])
+                                                 'internal': max(0, days_to_internal)}, internal_release_complete, PI_name])
 
     return datasets_status
 
@@ -141,7 +145,7 @@ def send_dataset_notifications(dataset_status):
     the specified day to send email report out.
     """
     release_msg = "".join([
-                   "Hello {0},",
+                   "Hello Dr. {0},",
                    "\n\n",
                    "Thank you for depositing data with the MIBC! ",
                    "We are reaching out because some of the data you have deposited ",
@@ -173,15 +177,15 @@ def send_dataset_notifications(dataset_status):
                    "The JDRF MIBC team"])
 
     for (email, datasets) in dataset_status.iteritems():
-        if datasets[0][5]:
+        if not datasets[0][5]:
             internal_release_dates = "Internal:\n{0}\n\n".format("   - " + "\n   - ".join(["{0}: {1} days to release".format(d[2], d[4].get('internal')) for d in datasets]))
         else:
             internal_release_dates = ""
 
-        public_release_dates = "Public:\n{0}".format("   - " + "\n   - ".join(["{0}: {1} days to release".format(d[2], d[4].get('public')) for d in datasets]))
+        public_release_dates = "Public(External Release):\n{0}".format("   - " + "\n   - ".join(["{0}: {1} days to release".format(d[2], d[4].get('public')) for d in datasets]))
         
 
-        user_name = datasets[0][0]
+        user_name = datasets[0][6]
         user_email = datasets[0][1]
         custom_release_msg = release_msg.format(user_name, internal_release_dates, public_release_dates)
         # send_email_update("Data Release Update %s - %s" % (pendulum.now().to_formatted_date_string(), user_name), custom_release_msg, to=email, cc=user_email)
