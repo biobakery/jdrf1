@@ -40,6 +40,7 @@ METADATA_VALIDATION_FILE_NAME = "sample_metadata.errors.xlsx"
 METADATA_VALIDATION_FILE_NAME_CSV = "metadata.error.csv"
 METADATA_EDIT_FILE_NAME = "metadata.update.csv"
 INTERNAL_RELEASE_DOT_FILE = ".released_internal"
+BLOCKED_DOT_FILE = ".blocked"
 
 # Some base settings for our data release policy
 RELEASE_INTERNAL_MONTHS = 6

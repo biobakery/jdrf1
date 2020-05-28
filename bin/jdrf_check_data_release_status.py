@@ -84,6 +84,7 @@ def get_all_archived_data_sets(archive_folder):
         archive_dt = pendulum.from_format(archive_date, 'MM_D_YYYY')
 
         metadata_study_file_path = os.path.join(archive_folder,user,study_name+'_'+archive_date+'_uploaded','metadata',settings.METADATA_GROUP_FILE_NAME)
+        user_dir_path = os.path.join(archive_folder,user)
         internal_release_complete = False
         # checking for the dot file to determine if a data set has been internally released
         if os.path.isfile(os.path.join(os.path.dirname(metadata_study_file_path), settings.INTERNAL_RELEASE_DOT_FILE)):
@@ -149,6 +150,11 @@ def send_dataset_notifications(dataset_status):
     release_msg = "".join([
                    "Hello Dr. {0},",
                    "\n\n",
+                   "\n\n",
+                   "**Please disregard this automated email if you have already reached out to us regarding your internal/external ",
+                   "data release**",
+                    "\n\n",
+
                    "Thank you for depositing data with the MIBC! ",
                    "We are reaching out because some of the data you have deposited ",
                    "is ready for (internal/external) release. Please see below for ",
@@ -171,9 +177,6 @@ def send_dataset_notifications(dataset_status):
                    "{1}",
                    "{2}",
                    "\n\n",
-                   "If you have already reached out to us regarding your internal/external ",
-                   "data release, you may disregard this automated email.",
-                   "\n\n",
                    "Please email the JDRF MIBC team (cced on this email) if you have any ",
                    "questions regarding the data release policy.",
                    "\n\n",
@@ -192,8 +195,14 @@ def send_dataset_notifications(dataset_status):
 
         user_name = datasets[0][6]
         user_email = datasets[0][1]
+        project_path = datasets[0][3]
+        temp = project_path[0].split("archive_folder")
+        user_dir_name=  temp[1].split('/')
+        user_dir_path = temp[0]+"archive_folder/"+user_dir_name[1]
         custom_release_msg = release_msg.format(user_name, internal_release_dates, public_release_dates)
-        send_email_update("Data Release Update %s - %s" % (pendulum.now().to_formatted_date_string(), user_name), custom_release_msg, to=email, cc=user_email)
+        #Checking for a .blocked dot file and not sending email if it is blocked
+        if not (os.path.isfile(os.path.join(os.path.dirname(user_dir_path+"/"), settings.BLOCKED_DOT_FILE))):
+            send_email_update("Data Release Update %s - %s" % (pendulum.now().to_formatted_date_string(), user_name), custom_release_msg, to=email, cc=user_email)
 
 
 archived_datasets = get_all_archived_data_sets(settings.ARCHIVE_FOLDER)
